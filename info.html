@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>의견 남기기</title>
+ <style>
+  html, body { height: 100%; }
+  body {
+   margin: 0;
+   min-height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background: #f8f9fa;
+   font-family: "Comic Sans MS", "맑은 고딕", "Malgun Gothic", sans-serif;
+  }
+  .card {
+   width: 520px;
+   background: #ffffff;
+   border-radius: 12px;
+   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+   padding: 28px;
+   box-sizing: border-box;
+   text-align: left;
+  }
+  h1 { margin: 0 0 12px 0; font-size: 22px; color: #333; }
+  .field { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row input { flex: 1; }
+  label { font-size: 14px; color: #333; font-weight: bold; }
+  input[type="text"], textarea {
+   padding: 10px 12px;
+   border-radius: 12px;
+   border: 1px solid #e0e0e0;
+   outline: none;
+   font-size: 14px;
+   background: #fff;
+   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  select {
+   border: 1px solid #e0e0e0;
+   border-radius: 12px;
+   background: #fff;
+   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .actions { margin-top: 16px; display: flex; gap: 8px; }
+  .btn {
+   flex: 1;
+   height: 44px;
+   border: none;
+   border-radius: 12px;
+   background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+   color: #ffffff;
+   font-size: 15px;
+   cursor: pointer;
+   font-weight: bold;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+   transition: all 0.3s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+  .btn:active { transform: translateY(1px); }
+  .msg { margin-top: 10px; font-size: 13px; }
+  .error { color: #dc2626; font-weight: bold; }
+  .success { color: #32cd32; font-weight: bold; }
+ </style>
+</head>
+<body>
+ <div class="card">
+  <h1 id="title"></h1>
+  <div class="field">
+   <label for="friendName">당신의 이름</label>
+   <div class="row">
+    <select id="friendIcon" title="아이콘 선택" style="height:40px; border:1px solid #d6d9df; border-radius:8px; padding:0 8px;">
+     <option value="">pick</option>
+     <option>🥰</option>
+     <option>🫥</option>
+     <option>😎</option>
+     <option>😝</option>
+     <option>😵</option>
+     <option>🤪</option>
+     <option>😇</option>
+     <option>🥳</option>
+     <option>🥸</option>
+     <option>👻</option>
+     <option>🍀</option>
+    </select>
+    <input id="friendName" type="text" placeholder="당신의 이름을 입력하세요">
+   </div>
+  </div>
+  <div class="field">
+   <label for="firstImpression">첫인상</label>
+   <textarea id="firstImpression"></textarea>
+  </div>
+  <div class="field">
+   <label for="currentImpression">현 인상</label>
+   <textarea id="currentImpression"></textarea>
+  </div>
+  <div class="actions">
+   <button id="submit" class="btn">제출하기</button>
+  </div>
+  <div id="msg" class="msg"></div>
+ </div>
+ <script>
+  (function(){
+   const nameMapKey = 'idToName';
+   const params = new URLSearchParams(location.search);
+   const userId = params.get('id') || '';
+
+   function loadNameMap() {
+    try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
+    catch (e) { return {}; }
+   }
+
+   const map = loadNameMap();
+   const name = map[userId] || '(이름 미확인)';
+   document.getElementById('title').textContent = name + '님에 대한 의견 남기기';
+   
+   document.getElementById('firstImpression').placeholder = name + '님을 처음 봤을 때의 인상을 적어주세요';
+   document.getElementById('currentImpression').placeholder = '현재 느끼는 ' + name + '님의 인상을 적어주세요';
+
+   const friendName = document.getElementById('friendName');
+   const friendIcon = document.getElementById('friendIcon');
+   const firstImpression = document.getElementById('firstImpression');
+   const currentImpression = document.getElementById('currentImpression');
+   const msg = document.getElementById('msg');
+
+   function setMessage(t, type){ msg.textContent = t; msg.className = 'msg ' + (type||''); }
+
+   document.getElementById('submit').addEventListener('click', function(){
+    const f = (friendName.value||'').trim();
+    const fi = (firstImpression.value||'').trim();
+    const ci = (currentImpression.value||'').trim();
+
+    if(!f){ setMessage('당신의 이름을 입력하세요.', 'error'); return; }
+    if(!fi){ setMessage('첫인상을 입력하세요.', 'error'); return; }
+    if(!ci){ setMessage('현 인상을 입력하세요.', 'error'); return; }
+
+    const key = 'opinions:' + userId;
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push({ friendName: f, icon: (friendIcon && friendIcon.value) || '', firstImpression: fi, currentImpression: ci, at: Date.now() });
+    localStorage.setItem(key, JSON.stringify(list));
+    setMessage('제출되었습니다. 감사합니다!', 'success');
+    setTimeout(function(){
+     const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
+     const accName = nameMap[userId] || '';
+     const base = location.href.replace(/info\.html.*$/, 'profile.html');
+     const url = base + '?id=' + encodeURIComponent(userId) + (accName ? ('&name=' + encodeURIComponent(accName)) : '');
+     location.href = url;
+    }, 500);
+   });
+  })();
+ </script>
+</body>
+</html>
+

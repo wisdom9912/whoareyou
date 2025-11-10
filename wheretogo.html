@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>시작하기</title>
+ <style>
+  html, body { height: 100%; }
+  body {
+   margin: 0;
+   min-height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background: #f8f9fa;
+   font-family: "Comic Sans MS", "맑은 고딕", "Malgun Gothic", sans-serif;
+  }
+  .card {
+   width: 360px;
+   background: #ffffff;
+   border-radius: 12px;
+   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+   padding: 28px;
+   box-sizing: border-box;
+   text-align: left;
+  }
+  .card h1 {
+   margin: 0 0 16px 0;
+   font-size: 22px;
+   color: #333;
+  }
+  .field {
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+   margin-top: 12px;
+  }
+  .inputRow { display: flex; gap: 8px; }
+  .inputRow input { flex: 1; }
+  label { font-size: 14px; color: #333; font-weight: bold; }
+  input[type="text"] {
+   height: 40px;
+   padding: 0 12px;
+   border-radius: 12px;
+   border: 1px solid #e0e0e0;
+   outline: none;
+   font-size: 14px;
+   background: #fff;
+   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .actions { margin-top: 16px; }
+  .btn {
+   width: 100%;
+   height: 44px;
+   border: none;
+   border-radius: 12px;
+   background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+   color: #ffffff;
+   font-size: 15px;
+   cursor: pointer;
+   font-weight: bold;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+   transition: all 0.3s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+  .btn.inline { width: auto; padding: 0 16px; height: 40px; background: linear-gradient(135deg, #a8d8ff 0%, #87ceeb 100%); }
+  .btn:active { transform: translateY(1px); }
+ </style>
+</head>
+<body>
+ <div class="card">
+  <h1>누구의 프로필로 이동할까요?</h1>
+  <div class="field">
+   <label for="userId">아이디</label>
+   <div class="inputRow">
+    <input id="userId" type="text" placeholder="아이디를 입력하세요" autocomplete="username">
+    <button id="loginBtn" class="btn inline">go</button>
+   </div>
+  </div>
+  <div class="actions">
+   <button id="goRegister" class="btn">내 프로필 생성하기</button>
+   <div style="margin-top:8px"></div>
+   <button id="clearData" class="btn" style="background:#dc2626">데이터 초기화</button>
+  </div>
+ </div>
+ <script>
+  document.getElementById('goRegister').addEventListener('click', function () {
+   window.location.href = 'register.html';
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+   var userIdInput = document.getElementById('userId');
+   var userId = (userIdInput.value || '').trim();
+   if (!userId) { alert('아이디를 입력하세요.'); return; }
+   var ids;
+   try { ids = JSON.parse(localStorage.getItem('registeredIds') || '[]'); }
+   catch (e) { ids = []; }
+   if (ids.includes(userId)) {
+    var nameMap = {};
+    try { nameMap = JSON.parse(localStorage.getItem('idToName') || '{}'); } catch (e) { nameMap = {}; }
+    var name = nameMap[userId] || '';
+    var url = 'profile.html?id=' + encodeURIComponent(userId);
+    if (name) { url += '&name=' + encodeURIComponent(name); }
+    window.location.href = url;
+   } else {
+    alert('등록되지 않은 아이디입니다. 회원가입을 진행해주세요.');
+   }
+  });
+
+  document.getElementById('clearData').addEventListener('click', function(){
+   try {
+    localStorage.removeItem('registeredIds');
+    localStorage.removeItem('idToName');
+    localStorage.removeItem('idToPassword');
+    var toRemove = [];
+    for (var i = 0; i < localStorage.length; i++) {
+     var k = localStorage.key(i);
+     if (k && (k.indexOf('opinions:') === 0 || k.indexOf('opinionGuess:') === 0)) toRemove.push(k);
+    }
+    toRemove.forEach(function(k){ localStorage.removeItem(k); });
+    alert('등록된 모든 데이터가 삭제되었습니다.');
+   } catch (e) {
+    alert('데이터 삭제 중 오류가 발생했습니다. 브라우저 저장소 권한을 확인하세요.');
+   }
+  });
+ </script>
+</body>
+</html>
+
