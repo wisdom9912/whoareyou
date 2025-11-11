@@ -1,0 +1,12 @@
+# Cloudflare Pages용 wrangler.toml 설정 파일
+# 이 파일을 프로젝트 루트에 두면 Pages가 자동으로 KV를 연결합니다
+
+name = "whoareyou"
+compatibility_date = "2025-02-04"
+
+# KV Namespace 연결
+# binding 이름은 코드에서 사용하는 env.WHOAREYOU_KV와 일치해야 합니다
+[[kv_namespaces]]
+binding = "WHOAREYOU_KV"
+id = "d4f2bf3e6d1d40958d97b2544ef02df7"
+
