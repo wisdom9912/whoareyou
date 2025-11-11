@@ -74,12 +74,11 @@
   </div>
  </div>
  <script>
-  (function(){
+  (async function(){
    const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
    const idx = parseInt(params.get('idx') || '-1', 10);
-   const nameFromQuery = params.get('name') || '';
    const nameMapKey = 'idToName';
 
    function loadNameMap() {
@@ -139,8 +138,29 @@
     }
    }
 
-   const map = loadNameMap();
-   const accountName = nameFromQuery || map[userId] || '(이름 미확인)';
+   // Load account name from API or localStorage
+   let accountName = '(이름 미확인)';
+   
+   // Try API first
+   if (userId) {
+    try {
+     const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
+     if (response.ok) {
+      const data = await response.json();
+      if (data.user && data.user.name) {
+       accountName = data.user.name;
+      }
+     }
+    } catch (e) {
+     console.error('API error, trying localStorage:', e);
+    }
+   }
+   
+   // Fallback to localStorage
+   if (accountName === '(이름 미확인)') {
+    const map = loadNameMap();
+    accountName = map[userId] || '(이름 미확인)';
+   }
    
    const guessSection = document.getElementById('guessSection');
    const fixedSection = document.getElementById('fixedGuessSection');
@@ -278,8 +298,7 @@
    });
 
    document.getElementById('back').addEventListener('click', function(){
-    const url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + (accountName ? ('&name=' + encodeURIComponent(accountName)) : '');
-    location.href = url;
+    window.location.href = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId);
    });
   })();
  </script>

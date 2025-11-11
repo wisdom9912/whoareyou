@@ -71,12 +71,11 @@
   </div>
  </div>
  <script>
-  (function(){
+  (async function(){
    const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const nameMapKey = 'idToName';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
-   const nameFromQuery = params.get('name') || '';
 
    function loadNameMap() {
     try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
@@ -84,10 +83,10 @@
    }
 
    // Load user name from API or localStorage
-   let name = nameFromQuery;
+   let name = '(이름 미확인)';
    
-   // If no name from query, try API
-   if (!name && userId) {
+   // Try API first
+   if (userId) {
     try {
      const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
      if (response.ok) {
@@ -102,7 +101,7 @@
    }
    
    // Fallback to localStorage
-   if (!name) {
+   if (name === '(이름 미확인)') {
     const map = loadNameMap();
     name = map[userId] || '(이름 미확인)';
    }
@@ -115,57 +114,21 @@
    function setMsg(t){ msg.textContent = t; }
 
    // 친구수집 버튼 클릭 핸들러
-   shareBtn.onclick = function(e) {
+   shareBtn.onclick = async function(e) {
     e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    
     if (!userId) {
      setMsg('아이디가 없습니다.');
      return false;
     }
-    
-    // info.html URL 생성
-    const targetUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId.trim());
-    
-    // 클립보드에 복사
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-     navigator.clipboard.writeText(targetUrl).then(function() {
-      setMsg('복사 완료: ' + targetUrl);
-     }).catch(function(err) {
-      console.error('복사 실패:', err);
-      fallbackCopy(targetUrl);
-     });
-    } else {
-     fallbackCopy(targetUrl);
+    const targetUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+    try {
+     await navigator.clipboard.writeText(targetUrl);
+     setMsg('복사 완료');
+    } catch(err) {
+     setMsg('복사 실패: ' + targetUrl);
     }
-    
     return false;
    };
-   
-   // 대체 복사 방법
-   function fallbackCopy(text) {
-    const input = document.createElement('input');
-    input.value = text;
-    input.style.position = 'fixed';
-    input.style.opacity = '0';
-    input.style.pointerEvents = 'none';
-    document.body.appendChild(input);
-    input.select();
-    input.setSelectionRange(0, text.length);
-    try {
-     const success = document.execCommand('copy');
-     document.body.removeChild(input);
-     if (success) {
-      setMsg('복사 완료: ' + text);
-     } else {
-      setMsg('복사 실패. 수동 복사: ' + text);
-     }
-    } catch(err) {
-     document.body.removeChild(input);
-     setMsg('복사 실패. 수동 복사: ' + text);
-    }
-   }
 
    async function loadOpinions() {
     try {
@@ -230,7 +193,7 @@
       btn.className = 'btnItem';
       btn.textContent = label;
       btn.addEventListener('click', function(){
-       const url = BASE_URL + '/mytomodacchi.html?id=' + encodeURIComponent(userId) + '&idx=' + idx + (name ? ('&name=' + encodeURIComponent(name)) : '');
+       const url = BASE_URL + '/mytomodacchi.html?id=' + encodeURIComponent(userId) + '&idx=' + idx;
        location.href = url;
       });
       container.appendChild(btn);

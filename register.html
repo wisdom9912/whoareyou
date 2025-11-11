@@ -189,8 +189,7 @@
 
      setMessage('등록이 완료되었습니다! 페이지로 이동합니다...', 'success');
      setTimeout(function(){
-      var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(name);
-      window.location.href = url;
+      window.location.href = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId);
      }, 400);
     } catch (error) {
      console.error('Registration error:', error);
