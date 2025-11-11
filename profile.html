@@ -98,13 +98,23 @@
      return;
     }
     
-    // info.html로 이동할 수 있는 완전한 URL 생성
+    // info.html로 이동할 수 있는 완전한 URL 생성 (id 파라미터만 포함)
+    // 명확하게 info.html로만 복사되도록 수정
     const infoUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+    
+    // URL 검증: info.html이 포함되어 있는지 확인
+    if (!infoUrl.includes('/info.html')) {
+     console.error('잘못된 URL 생성:', infoUrl);
+     setMsg('URL 생성 오류가 발생했습니다.');
+     return;
+    }
     
     console.log('복사할 URL:', infoUrl);
     console.log('userId:', userId);
+    console.log('현재 페이지 URL:', window.location.href);
     
     try {
+     // 클립보드에 정확한 info.html URL만 복사
      await navigator.clipboard.writeText(infoUrl);
      setMsg('복사되었습니다! 링크: ' + infoUrl);
     } catch(e) {
@@ -113,12 +123,17 @@
      ta.value = infoUrl;
      ta.style.position = 'fixed';
      ta.style.opacity = '0';
+     ta.style.left = '-9999px';
      document.body.appendChild(ta);
      ta.focus();
      ta.select();
      try {
-      document.execCommand('copy');
-      setMsg('복사되었습니다! 링크: ' + infoUrl);
+      const success = document.execCommand('copy');
+      if (success) {
+       setMsg('복사되었습니다! 링크: ' + infoUrl);
+      } else {
+       setMsg('복사 실패. 수동으로 복사하세요: ' + infoUrl);
+      }
      } catch(err) {
       setMsg('복사 실패. 수동으로 복사하세요: ' + infoUrl);
      }
