@@ -171,19 +171,29 @@
      });
 
      if (!response.ok) {
-      throw new Error('서버 오류가 발생했습니다.');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || '서버 오류가 발생했습니다.');
      }
 
+     const result = await response.json();
+     console.log('제출 성공:', result);
+     
      setMessage('제출되었습니다. 감사합니다!', 'success');
+     
+     // profile.html로 이동
      setTimeout(function(){
       const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
       const accName = nameMap[userId] || '';
-      const url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + (accName ? ('&name=' + encodeURIComponent(accName)) : '');
-      location.href = url;
-     }, 500);
+      let profileUrl = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId);
+      if (accName) {
+       profileUrl += '&name=' + encodeURIComponent(accName);
+      }
+      console.log('profile.html로 이동:', profileUrl);
+      window.location.href = profileUrl;
+     }, 1000);
     } catch (error) {
      console.error('Error:', error);
-     setMessage('제출 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+     setMessage('제출 중 오류가 발생했습니다: ' + error.message + ' 다시 시도해주세요.', 'error');
     }
    });
   })();

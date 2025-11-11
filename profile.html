@@ -97,19 +97,32 @@
      setMsg('아이디가 없습니다. 다시 시도해주세요.');
      return;
     }
-    const url = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
-    console.log('복사할 URL:', url);
+    
+    // info.html로 이동할 수 있는 완전한 URL 생성
+    const infoUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+    
+    console.log('복사할 URL:', infoUrl);
+    console.log('userId:', userId);
+    
     try {
-     await navigator.clipboard.writeText(url);
-     setMsg('복사되었습니다: ' + url);
+     await navigator.clipboard.writeText(infoUrl);
+     setMsg('복사되었습니다! 링크: ' + infoUrl);
     } catch(e) {
+     // 클립보드 API 실패 시 대체 방법
      const ta = document.createElement('textarea');
-     ta.value = url;
+     ta.value = infoUrl;
+     ta.style.position = 'fixed';
+     ta.style.opacity = '0';
      document.body.appendChild(ta);
+     ta.focus();
      ta.select();
-     document.execCommand('copy');
+     try {
+      document.execCommand('copy');
+      setMsg('복사되었습니다! 링크: ' + infoUrl);
+     } catch(err) {
+      setMsg('복사 실패. 수동으로 복사하세요: ' + infoUrl);
+     }
      document.body.removeChild(ta);
-     setMsg('복사되었습니다: ' + url);
     }
    });
 
