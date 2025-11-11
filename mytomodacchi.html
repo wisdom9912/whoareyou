@@ -151,9 +151,25 @@
    const passwordError = document.getElementById('passwordError');
    const leftHeaderEl = document.getElementById('left');
 
-   function loadPasswordMap() {
-    try { return JSON.parse(localStorage.getItem('idToPassword') || '{}'); }
-    catch (e) { return {}; }
+   async function verifyPassword(password) {
+    // Try to verify password from API first
+    try {
+     const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId) + '&checkPassword=' + encodeURIComponent(password));
+     if (response.ok) {
+      const data = await response.json();
+      return data.valid === true;
+     }
+    } catch (e) {
+     console.error('API error, trying localStorage:', e);
+    }
+    
+    // Fallback to localStorage
+    try {
+     const passwordMap = JSON.parse(localStorage.getItem('idToPassword') || '{}');
+     return passwordMap[userId] === password;
+    } catch (e) {
+     return false;
+    }
    }
 
    function hasFinalConsonant(str) {
@@ -230,9 +246,8 @@
      return;
     }
 
-    const passwordMap = loadPasswordMap();
-    const savedPassword = passwordMap[userId];
-    if (!savedPassword || savedPassword !== password) {
+    const isValidPassword = await verifyPassword(password);
+    if (!isValidPassword) {
      passwordError.textContent = '비밀번호가 일치하지 않습니다. 답을 맞출 수 없습니다.';
      guessInfo.textContent = '';
      return;

@@ -90,10 +90,27 @@
    window.location.href = BASE_URL + '/register.html';
   });
 
-  document.getElementById('loginBtn').addEventListener('click', function () {
+  document.getElementById('loginBtn').addEventListener('click', async function () {
    var userIdInput = document.getElementById('userId');
    var userId = (userIdInput.value || '').trim();
    if (!userId) { alert('아이디를 입력하세요.'); return; }
+   
+   try {
+    // Try to get user from API first
+    const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
+    if (response.ok) {
+     const data = await response.json();
+     if (data.user) {
+      var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(data.user.name);
+      window.location.href = url;
+      return;
+     }
+    }
+   } catch (e) {
+    console.error('API error, trying localStorage:', e);
+   }
+   
+   // Fallback to localStorage
    var ids;
    try { ids = JSON.parse(localStorage.getItem('registeredIds') || '[]'); }
    catch (e) { ids = []; }
@@ -109,8 +126,28 @@
    }
   });
 
-  document.getElementById('clearData').addEventListener('click', function(){
+  document.getElementById('clearData').addEventListener('click', async function(){
+   if (!confirm('모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    return;
+   }
+   
    try {
+    // Delete from KV
+    try {
+     const response = await fetch(BASE_URL + '/api/users', {
+      method: 'DELETE',
+      headers: {
+       'Content-Type': 'application/json',
+      }
+     });
+     if (response.ok) {
+      console.log('KV 데이터 삭제 완료');
+     }
+    } catch (e) {
+     console.error('KV 삭제 오류:', e);
+    }
+    
+    // Delete from localStorage
     localStorage.removeItem('registeredIds');
     localStorage.removeItem('idToName');
     localStorage.removeItem('idToPassword');

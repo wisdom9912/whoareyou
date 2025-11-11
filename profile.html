@@ -83,8 +83,30 @@
     catch (e) { return {}; }
    }
 
-   const map = loadNameMap();
-   const name = nameFromQuery || map[userId] || '(이름 미확인)';
+   // Load user name from API or localStorage
+   let name = nameFromQuery;
+   
+   // If no name from query, try API
+   if (!name && userId) {
+    try {
+     const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
+     if (response.ok) {
+      const data = await response.json();
+      if (data.user && data.user.name) {
+       name = data.user.name;
+      }
+     }
+    } catch (e) {
+     console.error('API error, trying localStorage:', e);
+    }
+   }
+   
+   // Fallback to localStorage
+   if (!name) {
+    const map = loadNameMap();
+    name = map[userId] || '(이름 미확인)';
+   }
+   
    document.getElementById('title').textContent = name + '은 어떤 사람인가요?';
 
    const shareBtn = document.getElementById('share');
@@ -92,43 +114,24 @@
 
    function setMsg(t){ msg.textContent = t; }
 
-   // 친구수집 버튼 클릭 핸들러 - 완전히 새로 작성
+   // 친구수집 버튼 클릭 핸들러
    shareBtn.onclick = function(e) {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    
-    console.log('=== 친구수집 버튼 클릭 시작 ===');
-    console.log('userId:', userId);
-    console.log('BASE_URL:', BASE_URL);
-    console.log('현재 페이지:', window.location.href);
     
     if (!userId) {
      setMsg('아이디가 없습니다.');
      return false;
     }
     
-    // userId 정리
-    const cleanId = String(userId).trim();
-    
-    // info.html URL 생성 - 절대 경로, 하드코딩
-    const targetUrl = 'https://7bfc4300.whoareyou-4bx.pages.dev/info.html?id=' + encodeURIComponent(cleanId);
-    
-    console.log('생성된 URL:', targetUrl);
-    console.log('현재 URL과 비교:', targetUrl !== window.location.href);
-    
-    // 검증: info.html이어야 하고, profile이 아니어야 함
-    if (!targetUrl.includes('/info.html') || targetUrl.includes('/profile')) {
-     console.error('❌ 잘못된 URL:', targetUrl);
-     setMsg('URL 생성 오류');
-     return false;
-    }
+    // info.html URL 생성
+    const targetUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId.trim());
     
     // 클립보드에 복사
     if (navigator.clipboard && navigator.clipboard.writeText) {
      navigator.clipboard.writeText(targetUrl).then(function() {
       setMsg('복사 완료: ' + targetUrl);
-      console.log('✅ 복사 성공:', targetUrl);
      }).catch(function(err) {
       console.error('복사 실패:', err);
       fallbackCopy(targetUrl);
@@ -155,14 +158,12 @@
      document.body.removeChild(input);
      if (success) {
       setMsg('복사 완료: ' + text);
-      console.log('✅ 복사 성공 (대체):', text);
      } else {
       setMsg('복사 실패. 수동 복사: ' + text);
      }
     } catch(err) {
      document.body.removeChild(input);
      setMsg('복사 실패. 수동 복사: ' + text);
-     console.error('복사 오류:', err);
     }
    }
 

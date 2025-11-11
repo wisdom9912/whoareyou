@@ -103,16 +103,12 @@
   <div id="msg" class="msg"></div>
  </div>
  <script>
-  (function(){
+  (async function(){
    const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const API_URL = BASE_URL + '/api/opinions';
    const nameMapKey = 'idToName';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
-   
-   // 디버깅: 현재 페이지가 info.html인지 확인
-   console.log('현재 페이지:', window.location.href);
-   console.log('userId:', userId);
    
    // userId가 없으면 에러 메시지 표시
    if (!userId) {
@@ -123,15 +119,33 @@
     return;
    }
 
-   function loadNameMap() {
-    try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
-    catch (e) { return {}; }
-   }
-
-   const map = loadNameMap();
-   const name = map[userId] || '(이름 미확인)';
-   document.getElementById('title').textContent = name + '님에 대한 의견 남기기';
+   // Load user name from API or localStorage
+   let name = '(이름 미확인)';
    
+   // Try API first
+   try {
+    const response = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
+    if (response.ok) {
+     const data = await response.json();
+     if (data.user && data.user.name) {
+      name = data.user.name;
+     }
+    }
+   } catch (e) {
+    console.error('API error, trying localStorage:', e);
+   }
+   
+   // Fallback to localStorage
+   if (name === '(이름 미확인)') {
+    function loadNameMap() {
+     try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
+     catch (e) { return {}; }
+    }
+    const map = loadNameMap();
+    name = map[userId] || '(이름 미확인)';
+   }
+   
+   document.getElementById('title').textContent = name + '님에 대한 의견 남기기';
    document.getElementById('firstImpression').placeholder = name + '님을 처음 봤을 때의 인상을 적어주세요';
    document.getElementById('currentImpression').placeholder = '현재 느끼는 ' + name + '님의 인상을 적어주세요';
 
@@ -181,14 +195,32 @@
      setMessage('제출되었습니다. 감사합니다!', 'success');
      
      // profile.html로 이동
-     setTimeout(function(){
-      const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
-      const accName = nameMap[userId] || '';
+     setTimeout(async function(){
+      let accName = '';
+      
+      // Try to get name from API
+      try {
+       const userResponse = await fetch(BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
+       if (userResponse.ok) {
+        const userData = await userResponse.json();
+        if (userData.user && userData.user.name) {
+         accName = userData.user.name;
+        }
+       }
+      } catch (e) {
+       console.error('API error, trying localStorage:', e);
+      }
+      
+      // Fallback to localStorage
+      if (!accName) {
+       const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
+       accName = nameMap[userId] || '';
+      }
+      
       let profileUrl = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId);
       if (accName) {
        profileUrl += '&name=' + encodeURIComponent(accName);
       }
-      console.log('profile.html로 이동:', profileUrl);
       window.location.href = profileUrl;
      }, 1000);
     } catch (error) {

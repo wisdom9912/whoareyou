@@ -133,7 +133,7 @@
     e.target.value = e.target.value.replace(/[^0-9]/g, '');
    });
 
-   document.getElementById('submit').addEventListener('click', function () {
+   document.getElementById('submit').addEventListener('click', async function () {
     const name = (nameInput.value || '').trim();
     const userId = (idInput.value || '').trim();
     const password = (passwordInput.value || '').trim();
@@ -144,26 +144,58 @@
     if (password.length !== 4) { setMessage('비밀번호는 4자리 숫자여야 합니다.', 'error'); return; }
     if (!/^[0-9]{4}$/.test(password)) { setMessage('비밀번호는 숫자만 입력 가능합니다.', 'error'); return; }
 
+    // Check duplicate in localStorage first (for quick feedback)
     const ids = loadIds();
-    const isDuplicate = ids.includes(userId);
-    if (isDuplicate) {
+    if (ids.includes(userId)) {
      setMessage('이미 등록된 아이디입니다. 다른 아이디를 사용하세요.', 'error');
      return;
     }
 
-    ids.push(userId);
-    saveIds(ids);
-    const map = loadNameMap();
-    map[userId] = name;
-    saveNameMap(map);
-    const passwordMap = loadPasswordMap();
-    passwordMap[userId] = password;
-    savePasswordMap(passwordMap);
-    setMessage('등록이 완료되었습니다! 페이지로 이동합니다...', 'success');
-    setTimeout(function(){
-     var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(name);
-     window.location.href = url;
-    }, 400);
+    setMessage('등록 중...', 'success');
+
+    try {
+     // Register user via API (saves to KV)
+     const response = await fetch(BASE_URL + '/api/users', {
+      method: 'POST',
+      headers: {
+       'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+       userId: userId,
+       name: name,
+       password: password
+      })
+     });
+
+     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      if (errorData.error && errorData.error.includes('이미 등록된')) {
+       setMessage('이미 등록된 아이디입니다. 다른 아이디를 사용하세요.', 'error');
+      } else {
+       throw new Error(errorData.message || '회원가입 실패');
+      }
+      return;
+     }
+
+     // Also save to localStorage for backward compatibility
+     ids.push(userId);
+     saveIds(ids);
+     const map = loadNameMap();
+     map[userId] = name;
+     saveNameMap(map);
+     const passwordMap = loadPasswordMap();
+     passwordMap[userId] = password;
+     savePasswordMap(passwordMap);
+
+     setMessage('등록이 완료되었습니다! 페이지로 이동합니다...', 'success');
+     setTimeout(function(){
+      var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(name);
+      window.location.href = url;
+     }, 400);
+    } catch (error) {
+     console.error('Registration error:', error);
+     setMessage('등록 중 오류가 발생했습니다: ' + error.message, 'error');
+    }
    });
 
    document.getElementById('back').addEventListener('click', function () {
