@@ -57,7 +57,7 @@
    <div class="card">
    <div class="titleRow">
     <h1 id="title"></h1>
-    <button id="share" class="btn btnShare">친구수집</button>
+    <button id="share" type="button" class="btn btnShare">친구수집</button>
    </div>
    <hr style="margin-top:12px; border:none; border-top:1px solid #e5e7eb;">
    <div id="msg" class="msg"></div>
@@ -92,54 +92,119 @@
 
    function setMsg(t){ msg.textContent = t; }
 
-   shareBtn.addEventListener('click', async function(){
+   shareBtn.addEventListener('click', async function(e){
+    // 이벤트 전파 완전 차단
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
     if (!userId) {
      setMsg('아이디가 없습니다. 다시 시도해주세요.');
+     return false;
+    }
+    
+    // userId 정리 (공백 제거, 문자열 변환)
+    const cleanUserId = String(userId).trim().replace(/[^a-zA-Z0-9가-힣_]/g, '');
+    
+    if (!cleanUserId) {
+     setMsg('유효하지 않은 아이디입니다.');
+     return false;
+    }
+    
+    // info.html로 이동할 수 있는 완전한 URL 생성
+    // BASE_URL을 명시적으로 사용하고, 현재 페이지 URL은 절대 사용하지 않음
+    const infoUrl = 'https://7bfc4300.whoareyou-4bx.pages.dev/info.html?id=' + encodeURIComponent(cleanUserId);
+    
+    // URL 검증 (현재 페이지 URL과 완전히 다른지 확인)
+    const currentUrl = window.location.href;
+    if (infoUrl === currentUrl || infoUrl.includes('/profile')) {
+     console.error('잘못된 URL 생성:', infoUrl);
+     console.error('현재 페이지 URL:', currentUrl);
+     setMsg('URL 생성 오류가 발생했습니다.');
+     return false;
+    }
+    
+    // URL에 id가 한 번만 포함되는지 확인
+    const idCount = (infoUrl.match(/[?&]id=/g) || []).length;
+    if (idCount !== 1) {
+     console.error('id 파라미터 개수 오류:', idCount, infoUrl);
+     // 강제로 올바른 URL 생성
+     const fixedUrl = 'https://7bfc4300.whoareyou-4bx.pages.dev/info.html?id=' + encodeURIComponent(cleanUserId);
+     console.log('수정된 URL:', fixedUrl);
+     await copyToClipboard(fixedUrl);
+     return false;
+    }
+    
+    console.log('=== 친구수집 버튼 클릭 ===');
+    console.log('현재 페이지 URL:', currentUrl);
+    console.log('복사할 URL:', infoUrl);
+    console.log('userId:', cleanUserId);
+    console.log('BASE_URL:', BASE_URL);
+    
+    await copyToClipboard(infoUrl);
+    return false;
+   }, true); // capture phase에서도 실행
+   
+   // 클립보드 복사 함수 분리
+   async function copyToClipboard(textToCopy) {
+    // 복사 전 최종 검증
+    if (!textToCopy || !textToCopy.includes('/info.html')) {
+     console.error('잘못된 URL 복사 시도:', textToCopy);
+     setMsg('URL 오류: ' + textToCopy);
      return;
     }
     
-    // info.html로 이동할 수 있는 완전한 URL 생성 (id 파라미터만 포함)
-    // 명확하게 info.html로만 복사되도록 수정
-    const infoUrl = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
-    
-    // URL 검증: info.html이 포함되어 있는지 확인
-    if (!infoUrl.includes('/info.html')) {
-     console.error('잘못된 URL 생성:', infoUrl);
+    // 현재 페이지 URL과 다른지 확인
+    if (textToCopy === window.location.href) {
+     console.error('현재 페이지 URL과 동일함!', textToCopy);
      setMsg('URL 생성 오류가 발생했습니다.');
      return;
     }
     
-    console.log('복사할 URL:', infoUrl);
-    console.log('userId:', userId);
-    console.log('현재 페이지 URL:', window.location.href);
-    
     try {
-     // 클립보드에 정확한 info.html URL만 복사
-     await navigator.clipboard.writeText(infoUrl);
-     setMsg('복사되었습니다! 링크: ' + infoUrl);
+     // 명시적으로 info.html URL만 복사
+     await navigator.clipboard.writeText(textToCopy);
+     setMsg('복사되었습니다! 링크: ' + textToCopy);
+     console.log('✅ 복사 성공:', textToCopy);
     } catch(e) {
-     // 클립보드 API 실패 시 대체 방법
+     console.error('클립보드 API 실패:', e);
+     // 대체 방법
      const ta = document.createElement('textarea');
-     ta.value = infoUrl;
+     ta.value = textToCopy;
+     ta.readOnly = true;
      ta.style.position = 'fixed';
+     ta.style.top = '0';
+     ta.style.left = '0';
+     ta.style.width = '2px';
+     ta.style.height = '2px';
+     ta.style.padding = '0';
+     ta.style.border = 'none';
+     ta.style.outline = 'none';
+     ta.style.boxShadow = 'none';
+     ta.style.background = 'transparent';
      ta.style.opacity = '0';
-     ta.style.left = '-9999px';
+     ta.style.pointerEvents = 'none';
      document.body.appendChild(ta);
      ta.focus();
      ta.select();
+     ta.setSelectionRange(0, textToCopy.length);
      try {
       const success = document.execCommand('copy');
+      document.body.removeChild(ta);
       if (success) {
-       setMsg('복사되었습니다! 링크: ' + infoUrl);
+       setMsg('복사되었습니다! 링크: ' + textToCopy);
+       console.log('✅ 복사 성공 (대체 방법):', textToCopy);
       } else {
-       setMsg('복사 실패. 수동으로 복사하세요: ' + infoUrl);
+       setMsg('복사 실패. 수동으로 복사하세요: ' + textToCopy);
+       console.error('❌ 복사 실패');
       }
      } catch(err) {
-      setMsg('복사 실패. 수동으로 복사하세요: ' + infoUrl);
+      document.body.removeChild(ta);
+      setMsg('복사 실패. 수동으로 복사하세요: ' + textToCopy);
+      console.error('❌ 복사 실패:', err);
      }
-     document.body.removeChild(ta);
     }
-   });
+   }
 
    async function loadOpinions() {
     try {
