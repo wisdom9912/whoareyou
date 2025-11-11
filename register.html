@@ -88,6 +88,7 @@
  </div>
  <script>
   (function () {
+   const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const storageKey = 'registeredIds';
    const nameMapKey = 'idToName';
    const passwordMapKey = 'idToPassword';
@@ -160,13 +161,13 @@
     savePasswordMap(passwordMap);
     setMessage('등록이 완료되었습니다! 페이지로 이동합니다...', 'success');
     setTimeout(function(){
-     var url = 'profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(name);
+     var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + '&name=' + encodeURIComponent(name);
      window.location.href = url;
     }, 400);
    });
 
    document.getElementById('back').addEventListener('click', function () {
-    window.location.href = 'index.html';
+    window.location.href = BASE_URL + '/index.html';
    });
   })();
  </script>

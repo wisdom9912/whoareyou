@@ -75,35 +75,73 @@
  </div>
  <script>
   (function(){
+   const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
    const idx = parseInt(params.get('idx') || '-1', 10);
    const nameFromQuery = params.get('name') || '';
    const nameMapKey = 'idToName';
-   const guessKey = 'opinionGuess:' + userId + ':' + idx;
 
    function loadNameMap() {
     try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
     catch (e) { return {}; }
    }
-   function loadOpinions(){
-    try { return JSON.parse(localStorage.getItem('opinions:' + userId) || '[]'); }
-    catch (e) { return []; }
+   async function loadOpinions(){
+    try {
+     const response = await fetch(BASE_URL + '/api/opinions?userId=' + encodeURIComponent(userId));
+     if (!response.ok) {
+      throw new Error('API 요청 실패: ' + response.status);
+     }
+     const data = await response.json();
+     return data.opinions || [];
+    } catch (e) {
+     console.error('Error loading opinions:', e);
+     throw e;
+    }
+   }
+   
+   async function loadGuess() {
+    try {
+     const response = await fetch(BASE_URL + '/api/guesses?userId=' + encodeURIComponent(userId) + '&idx=' + idx);
+     if (response.ok) {
+      const data = await response.json();
+      return data.guess || null;
+     }
+     return null;
+    } catch (e) {
+     console.error('Error loading guess:', e);
+     return null;
+    }
+   }
+   
+   async function saveGuess(guess) {
+    try {
+     const response = await fetch(BASE_URL + '/api/guesses', {
+      method: 'POST',
+      headers: {
+       'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+       userId: userId,
+       idx: idx,
+       guess: guess
+      })
+     });
+     
+     if (!response.ok) {
+      throw new Error('추측 저장 실패');
+     }
+     
+     return true;
+    } catch (e) {
+     console.error('Error saving guess:', e);
+     throw e;
+    }
    }
 
    const map = loadNameMap();
    const accountName = nameFromQuery || map[userId] || '(이름 미확인)';
-   const list = loadOpinions();
-   const item = list[idx] || {};
-
-   const friendName = item.friendName || '???';
-   document.getElementById('left').textContent = '???가 생각하는';
-   document.getElementById('right').textContent = accountName;
-   document.getElementById('first').textContent = item.firstImpression || '';
-   document.getElementById('current').textContent = item.currentImpression || '';
-   document.getElementById('answer').textContent = friendName;
-
-   const savedGuess = localStorage.getItem(guessKey);
+   
    const guessSection = document.getElementById('guessSection');
    const fixedSection = document.getElementById('fixedGuessSection');
    const fixedGuessEl = document.getElementById('fixedGuess');
@@ -125,7 +163,7 @@
     return (code >= 0xAC00 && code <= 0xD7A3) && ((code - 0xAC00) % 28 !== 0);
    }
 
-   function lockGuess(guess){
+   function lockGuess(guess, friendName){
     fixedGuessEl.textContent = guess;
     const accountHasJosa = hasFinalConsonant(accountName);
     const accountJosa = accountHasJosa ? accountName + '이' : accountName + '가';
@@ -141,16 +179,37 @@
     }
    }
 
-   if (savedGuess) {
-    lockGuess(savedGuess);
+   function updateUI(item, savedGuess) {
+    const friendName = item.friendName || '???';
+    document.getElementById('left').textContent = '???가 생각하는';
+    document.getElementById('right').textContent = accountName;
+    document.getElementById('first').textContent = item.firstImpression || '';
+    document.getElementById('current').textContent = item.currentImpression || '';
+    document.getElementById('answer').textContent = friendName;
+
+    if (savedGuess) {
+     lockGuess(savedGuess, friendName);
+    }
    }
+
+   // Load opinions and guess asynchronously and update UI
+   Promise.all([loadOpinions(), loadGuess()]).then(function(results) {
+    const opinions = results[0];
+    const savedGuess = results[1];
+    const item = opinions[idx] || {};
+    updateUI(item, savedGuess);
+   }).catch(function(err) {
+    console.error('Error:', err);
+    document.getElementById('first').textContent = '데이터를 불러오는 중 오류가 발생했습니다.';
+    document.getElementById('current').textContent = '잠시 후 다시 시도해주세요.';
+   });
 
    passwordInput.addEventListener('input', function(e) {
     e.target.value = e.target.value.replace(/[^0-9]/g, '');
     passwordError.textContent = '';
    });
 
-   document.getElementById('guessBtn').addEventListener('click', function(){
+   document.getElementById('guessBtn').addEventListener('click', async function(){
     const input = document.getElementById('guessInput');
     const password = (passwordInput.value || '').trim();
     const val = (input.value || '').trim();
@@ -187,17 +246,24 @@
 
     try {
      passwordError.textContent = '';
+     guessInfo.textContent = '저장 중...';
+     
+     // Save guess to Cloudflare
+     await saveGuess(val);
+     
+     // Get the current item to pass friendName
+     const opinions = await loadOpinions();
+     const currentItem = opinions[idx] || {};
+     lockGuess(val, currentItem.friendName);
      guessInfo.textContent = '';
-     localStorage.setItem(guessKey, val);
-     lockGuess(val);
     } catch (e) {
-     guessInfo.textContent = '저장 중 오류가 발생했습니다.';
+     console.error('Error saving guess:', e);
+     guessInfo.textContent = '저장 중 오류가 발생했습니다. 다시 시도해주세요.';
     }
    });
 
    document.getElementById('back').addEventListener('click', function(){
-    const base = location.href.replace(/mytomodacchi\.html.*$/, 'profile.html');
-    const url = base + '?id=' + encodeURIComponent(userId) + (accountName ? ('&name=' + encodeURIComponent(accountName)) : '');
+    const url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + (accountName ? ('&name=' + encodeURIComponent(accountName)) : '');
     location.href = url;
    });
   })();

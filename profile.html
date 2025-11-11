@@ -72,6 +72,7 @@
  </div>
  <script>
   (function(){
+   const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
    const nameMapKey = 'idToName';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
@@ -92,8 +93,7 @@
    function setMsg(t){ msg.textContent = t; }
 
    shareBtn.addEventListener('click', async function(){
-    const base = location.href.replace(/profile\.html.*$/, 'info.html');
-    const url = base + '?id=' + encodeURIComponent(userId);
+    const url = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
     try {
      await navigator.clipboard.writeText(url);
      setMsg('복사되었습니다: ' + url);
@@ -108,55 +108,88 @@
     }
    });
 
-   function loadOpinions() {
-    try { return JSON.parse(localStorage.getItem('opinions:' + userId) || '[]'); }
-    catch (e) { return []; }
+   async function loadOpinions() {
+    try {
+     const response = await fetch(BASE_URL + '/api/opinions?userId=' + encodeURIComponent(userId));
+     if (!response.ok) {
+      throw new Error('API 요청 실패: ' + response.status);
+     }
+     const data = await response.json();
+     return data.opinions || [];
+    } catch (e) {
+     console.error('Error loading opinions:', e);
+     throw e;
+    }
+   }
+   
+   async function loadGuess(userId, idx) {
+    try {
+     const response = await fetch(BASE_URL + '/api/guesses?userId=' + encodeURIComponent(userId) + '&idx=' + idx);
+     if (response.ok) {
+      const data = await response.json();
+      return data.guess || null;
+     }
+     return null;
+    } catch (e) {
+     console.error('Error loading guess:', e);
+     return null;
+    }
    }
 
-   function renderOpinionButtons() {
+   async function renderOpinionButtons() {
     const container = document.getElementById('opinions');
-    container.innerHTML = '';
-    const list = loadOpinions();
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">로딩 중...</div>';
     
-    if (list.length === 0) {
-     const emptyMsg = document.createElement('div');
-     emptyMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; color: #6b7280; font-size: 14px; padding: 40px 20px; line-height: 1.6; text-align: center;';
-     emptyMsg.innerHTML = '<div><div style="font-size: 18px; margin-bottom: 8px;">↗</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
-     container.appendChild(emptyMsg);
-     return;
-    }
-    
-    list.forEach(function(item, idx){
-     const guessKey = 'opinionGuess:' + userId + ':' + idx;
-     const hasGuess = !!localStorage.getItem(guessKey);
-     const icon = item.icon || '';
-     const nameLabel = hasGuess && item.friendName ? item.friendName : '';
-     let label = '';
-     if (nameLabel) {
-      label = icon ? (icon + ' ' + nameLabel) : nameLabel;
-     } else {
-      label = icon ? icon : '?';
+    try {
+     const list = await loadOpinions();
+     
+     container.innerHTML = '';
+     
+     if (list.length === 0) {
+      const emptyMsg = document.createElement('div');
+      emptyMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; color: #6b7280; font-size: 14px; padding: 40px 20px; line-height: 1.6; text-align: center;';
+      emptyMsg.innerHTML = '<div><div style="font-size: 18px; margin-bottom: 8px;">↗</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
+      container.appendChild(emptyMsg);
+      return;
      }
-     const btn = document.createElement('button');
-     btn.className = 'btnItem';
-     btn.textContent = label;
-     btn.addEventListener('click', function(){
-      const base = location.href.replace(/profile\.html.*$/, 'mytomodacchi.html');
-      const url = base + '?id=' + encodeURIComponent(userId) + '&idx=' + idx + (name ? ('&name=' + encodeURIComponent(name)) : '');
-      location.href = url;
+     
+     // Load all guesses in parallel
+     const guessPromises = list.map((item, idx) => loadGuess(userId, idx));
+     const guesses = await Promise.all(guessPromises);
+     
+     list.forEach(function(item, idx){
+      const hasGuess = !!guesses[idx];
+      const icon = item.icon || '';
+      const nameLabel = hasGuess && item.friendName ? item.friendName : '';
+      let label = '';
+      if (nameLabel) {
+       label = icon ? (icon + ' ' + nameLabel) : nameLabel;
+      } else {
+       label = icon ? icon : '?';
+      }
+      const btn = document.createElement('button');
+      btn.className = 'btnItem';
+      btn.textContent = label;
+      btn.addEventListener('click', function(){
+       const url = BASE_URL + '/mytomodacchi.html?id=' + encodeURIComponent(userId) + '&idx=' + idx + (name ? ('&name=' + encodeURIComponent(name)) : '');
+       location.href = url;
+      });
+      container.appendChild(btn);
      });
-     container.appendChild(btn);
-    });
+    } catch (err) {
+     console.error('Error rendering opinions:', err);
+     container.innerHTML = '<div style="text-align:center; padding:20px; color:#dc2626;">데이터를 불러오는 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</div>';
+    }
    }
 
    renderOpinionButtons();
 
    document.getElementById('createMine').addEventListener('click', function(){
-    window.location.href = 'register.html';
+    window.location.href = BASE_URL + '/register.html';
    });
 
    document.getElementById('goBack').addEventListener('click', function(){
-    window.location.href = 'index.html';
+    window.location.href = BASE_URL + '/index.html';
    });
   })();
  </script>

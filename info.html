@@ -104,6 +104,8 @@
  </div>
  <script>
   (function(){
+   const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
+   const API_URL = BASE_URL + '/api/opinions';
    const nameMapKey = 'idToName';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
@@ -128,7 +130,7 @@
 
    function setMessage(t, type){ msg.textContent = t; msg.className = 'msg ' + (type||''); }
 
-   document.getElementById('submit').addEventListener('click', function(){
+   document.getElementById('submit').addEventListener('click', async function(){
     const f = (friendName.value||'').trim();
     const fi = (firstImpression.value||'').trim();
     const ci = (currentImpression.value||'').trim();
@@ -137,18 +139,39 @@
     if(!fi){ setMessage('첫인상을 입력하세요.', 'error'); return; }
     if(!ci){ setMessage('현 인상을 입력하세요.', 'error'); return; }
 
-    const key = 'opinions:' + userId;
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.push({ friendName: f, icon: (friendIcon && friendIcon.value) || '', firstImpression: fi, currentImpression: ci, at: Date.now() });
-    localStorage.setItem(key, JSON.stringify(list));
-    setMessage('제출되었습니다. 감사합니다!', 'success');
-    setTimeout(function(){
-     const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
-     const accName = nameMap[userId] || '';
-     const base = location.href.replace(/info\.html.*$/, 'profile.html');
-     const url = base + '?id=' + encodeURIComponent(userId) + (accName ? ('&name=' + encodeURIComponent(accName)) : '');
-     location.href = url;
-    }, 500);
+    setMessage('제출 중...', 'success');
+    
+    try {
+     const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+       'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+       userId: userId,
+       friendName: f,
+       icon: (friendIcon && friendIcon.value) || '',
+       firstImpression: fi,
+       currentImpression: ci,
+       at: Date.now()
+      })
+     });
+
+     if (!response.ok) {
+      throw new Error('서버 오류가 발생했습니다.');
+     }
+
+     setMessage('제출되었습니다. 감사합니다!', 'success');
+     setTimeout(function(){
+      const nameMap = JSON.parse(localStorage.getItem('idToName') || '{}');
+      const accName = nameMap[userId] || '';
+      const url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId) + (accName ? ('&name=' + encodeURIComponent(accName)) : '');
+      location.href = url;
+     }, 500);
+    } catch (error) {
+     console.error('Error:', error);
+     setMessage('제출 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+    }
    });
   })();
  </script>

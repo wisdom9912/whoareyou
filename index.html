@@ -84,8 +84,10 @@
   </div>
  </div>
  <script>
+  const BASE_URL = 'https://7bfc4300.whoareyou-4bx.pages.dev';
+  
   document.getElementById('goRegister').addEventListener('click', function () {
-   window.location.href = 'register.html';
+   window.location.href = BASE_URL + '/register.html';
   });
 
   document.getElementById('loginBtn').addEventListener('click', function () {
@@ -99,7 +101,7 @@
     var nameMap = {};
     try { nameMap = JSON.parse(localStorage.getItem('idToName') || '{}'); } catch (e) { nameMap = {}; }
     var name = nameMap[userId] || '';
-    var url = 'profile.html?id=' + encodeURIComponent(userId);
+    var url = BASE_URL + '/profile.html?id=' + encodeURIComponent(userId);
     if (name) { url += '&name=' + encodeURIComponent(name); }
     window.location.href = url;
    } else {
