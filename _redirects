@@ -1,0 +1,9 @@
+# Cloudflare Pages redirects file
+# This ensures HTML files are served correctly
+
+/info.html /info.html 200
+/profile.html /profile.html 200
+/register.html /register.html 200
+/mytomodacchi.html /mytomodacchi.html 200
+/index.html /index.html 200
+

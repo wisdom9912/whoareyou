@@ -93,7 +93,12 @@
    function setMsg(t){ msg.textContent = t; }
 
    shareBtn.addEventListener('click', async function(){
+    if (!userId) {
+     setMsg('아이디가 없습니다. 다시 시도해주세요.');
+     return;
+    }
     const url = BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+    console.log('복사할 URL:', url);
     try {
      await navigator.clipboard.writeText(url);
      setMsg('복사되었습니다: ' + url);

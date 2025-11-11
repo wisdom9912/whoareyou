@@ -109,6 +109,19 @@
    const nameMapKey = 'idToName';
    const params = new URLSearchParams(location.search);
    const userId = params.get('id') || '';
+   
+   // 디버깅: 현재 페이지가 info.html인지 확인
+   console.log('현재 페이지:', window.location.href);
+   console.log('userId:', userId);
+   
+   // userId가 없으면 에러 메시지 표시
+   if (!userId) {
+    document.getElementById('title').textContent = '오류: 아이디가 없습니다';
+    const msg = document.getElementById('msg');
+    msg.textContent = '올바른 링크로 접근해주세요.';
+    msg.className = 'msg error';
+    return;
+   }
 
    function loadNameMap() {
     try { return JSON.parse(localStorage.getItem(nameMapKey) || '{}'); }
