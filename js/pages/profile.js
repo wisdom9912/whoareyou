@@ -1,0 +1,137 @@
+// 프로필 페이지
+const ProfilePage = {
+  render() {
+    return `
+      <div class="wrap">
+        <div class="card">
+          <div class="titleRow">
+            <h1 id="title"></h1>
+            <button id="share" type="button" class="btn btnShare">친구수집</button>
+          </div>
+          <hr style="margin-top:12px; border:none; border-top:1px solid #e5e7eb;">
+          <div id="msg" class="msg"></div>
+          <div id="opinions" class="list"></div>
+        </div>
+        <div class="outerActions">
+          <button id="createMine" class="btn">내 정보 생성하기</button>
+        </div>
+        <div class="outerActions">
+          <button id="goBack" class="btn secondary">뒤로가기</button>
+        </div>
+      </div>
+    `;
+  },
+  
+  async init(params) {
+    const userId = params.id || '';
+    const msg = document.getElementById('msg');
+
+    function setMsg(t) { msg.textContent = t; }
+
+    // Load user name
+    const name = await Utils.getUserName(userId);
+    document.getElementById('title').textContent = name + '은 어떤 사람인가요?';
+
+    // 친구수집 버튼 클릭 핸들러
+    document.getElementById('share').onclick = async (e) => {
+      e.preventDefault();
+      if (!userId) {
+        setMsg('아이디가 없습니다.');
+        return false;
+      }
+      // 외부 링크 호환성을 위해 info.html 사용 (자동으로 SPA로 변환됨)
+      const targetUrl = CONFIG.BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+      try {
+        await navigator.clipboard.writeText(targetUrl);
+        setMsg('복사 완료');
+      } catch(err) {
+        setMsg('복사 실패: ' + targetUrl);
+      }
+      return false;
+    };
+
+    async function loadOpinions() {
+      try {
+        const response = await fetch(CONFIG.BASE_URL + '/api/opinions?userId=' + encodeURIComponent(userId));
+        if (!response.ok) {
+          throw new Error('API 요청 실패: ' + response.status);
+        }
+        const data = await response.json();
+        return data.opinions || [];
+      } catch (e) {
+        console.error('Error loading opinions:', e);
+        throw e;
+      }
+    }
+    
+    async function loadGuess(userId, idx) {
+      try {
+        const response = await fetch(CONFIG.BASE_URL + '/api/guesses?userId=' + encodeURIComponent(userId) + '&idx=' + idx);
+        if (response.ok) {
+          const data = await response.json();
+          return data.guess || null;
+        }
+        return null;
+      } catch (e) {
+        console.error('Error loading guess:', e);
+        return null;
+      }
+    }
+
+    async function renderOpinionButtons() {
+      const container = document.getElementById('opinions');
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">로딩 중...</div>';
+      
+      try {
+        const list = await loadOpinions();
+        
+        container.innerHTML = '';
+        
+        if (list.length === 0) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; color: #6b7280; font-size: 14px; padding: 40px 20px; line-height: 1.6; text-align: center;';
+          emptyMsg.innerHTML = '<div><div style="font-size: 18px; margin-bottom: 8px;">↗</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
+          container.appendChild(emptyMsg);
+          return;
+        }
+        
+        // Load all guesses in parallel
+        const guessPromises = list.map((item, idx) => loadGuess(userId, idx));
+        const guesses = await Promise.all(guessPromises);
+        
+        list.forEach((item, idx) => {
+          const hasGuess = !!guesses[idx];
+          const icon = item.icon || '';
+          const nameLabel = hasGuess && item.friendName ? item.friendName : '';
+          let label = '';
+          if (nameLabel) {
+            label = icon ? (icon + ' ' + nameLabel) : nameLabel;
+          } else {
+            label = icon ? icon : '?';
+          }
+          const btn = document.createElement('button');
+          btn.className = 'btnItem';
+          btn.textContent = label;
+          btn.addEventListener('click', () => {
+            router.navigate('/mytomodacchi', { id: userId, idx: idx });
+          });
+          container.appendChild(btn);
+        });
+      } catch (err) {
+        console.error('Error rendering opinions:', err);
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#dc2626;">데이터를 불러오는 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</div>';
+      }
+    }
+
+    renderOpinionButtons();
+
+    document.getElementById('createMine').addEventListener('click', () => {
+      router.navigate('/register');
+    });
+
+    document.getElementById('goBack').addEventListener('click', () => {
+      router.navigate('/home');
+    });
+  }
+};
+
