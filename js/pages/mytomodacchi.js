@@ -2,7 +2,7 @@
 const MyTomodacchiPage = {
   render() {
     return `
-      <div class="card">
+      <div class="card" style="width: 640px;">
         <div class="header"><span id="left"></span><span id="right" class="right"></span></div>
         <div class="section">
           <h2>첫인상</h2>

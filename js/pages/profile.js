@@ -3,7 +3,7 @@ const ProfilePage = {
   render() {
     return `
       <div class="wrap">
-        <div class="card">
+        <div class="card" style="width: 540px;">
           <div class="titleRow">
             <h1 id="title"></h1>
             <button id="share" type="button" class="btn btnShare">친구수집</button>
@@ -39,13 +39,27 @@ const ProfilePage = {
         setMsg('아이디가 없습니다.');
         return false;
       }
-      // 외부 링크 호환성을 위해 info.html 사용 (자동으로 SPA로 변환됨)
-      const targetUrl = CONFIG.BASE_URL + '/info.html?id=' + encodeURIComponent(userId);
+      // 현재 호스트와 해시 라우팅을 사용한 info 페이지 링크 생성
+      const baseUrl = window.location.origin;
+      const targetUrl = baseUrl + '/#/info?id=' + encodeURIComponent(userId);
       try {
         await navigator.clipboard.writeText(targetUrl);
-        setMsg('복사 완료');
+        setMsg('링크가 복사되었습니다!');
       } catch(err) {
-        setMsg('복사 실패: ' + targetUrl);
+        // 클립보드 API 실패 시 대체 방법
+        const textArea = document.createElement('textarea');
+        textArea.value = targetUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setMsg('링크가 복사되었습니다!');
+        } catch(copyErr) {
+          setMsg('복사 실패. 링크: ' + targetUrl);
+        }
+        document.body.removeChild(textArea);
       }
       return false;
     };
@@ -60,7 +74,8 @@ const ProfilePage = {
         return data.opinions || [];
       } catch (e) {
         console.error('Error loading opinions:', e);
-        throw e;
+        // 에러 발생 시 빈 배열 반환 (화면 깨짐 방지)
+        return [];
       }
     }
     

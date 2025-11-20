@@ -43,6 +43,11 @@ const Utils = {
   },
   
   async getUserName(userId) {
+    // 마스터 테스트 아이디 처리
+    if (userId === 'qwe123') {
+      return '테스트 사용자';
+    }
+    
     const user = await this.getUser(userId);
     if (user && user.name) return user.name;
     
@@ -50,8 +55,21 @@ const Utils = {
     return map[userId] || '(이름 미확인)';
   },
   
-  // URL 파라미터 파싱
+  // URL 파라미터 파싱 (해시와 쿼리 모두 지원)
   getQueryParams() {
+    // 먼저 해시에서 쿼리 파라미터 확인
+    const hash = window.location.hash.substring(1);
+    if (hash && hash.includes('?')) {
+      const queryString = hash.split('?')[1];
+      const params = new URLSearchParams(queryString);
+      return {
+        id: params.get('id') || '',
+        idx: parseInt(params.get('idx') || '-1', 10),
+        name: params.get('name') || ''
+      };
+    }
+    
+    // 해시에 없으면 일반 쿼리 파라미터 확인
     const params = new URLSearchParams(window.location.search);
     return {
       id: params.get('id') || '',

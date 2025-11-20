@@ -33,26 +33,29 @@ const HomePage = {
         return; 
       }
       
+      // 마스터 테스트 아이디 처리
+      if (userId === 'qwe123') {
+        router.navigate('/profile', { id: userId });
+        return;
+      }
+      
       try {
-        // Try to get user from API first
+        // KV에서 사용자 정보 조회
         const response = await fetch(CONFIG.BASE_URL + '/api/users?userId=' + encodeURIComponent(userId));
         if (response.ok) {
           const data = await response.json();
           if (data.user) {
+            // 사용자 정보가 KV에 있으면 프로필 페이지로 이동
             router.navigate('/profile', { id: userId });
             return;
           }
         }
-      } catch (e) {
-        console.error('API error, trying localStorage:', e);
-      }
-      
-      // Fallback to localStorage
-      const ids = Utils.loadIds();
-      if (ids.includes(userId)) {
-        router.navigate('/profile', { id: userId });
-      } else {
+        
+        // 사용자를 찾을 수 없음
         alert('등록되지 않은 아이디입니다. 회원가입을 진행해주세요.');
+      } catch (e) {
+        console.error('API error:', e);
+        alert('서버 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
     });
 

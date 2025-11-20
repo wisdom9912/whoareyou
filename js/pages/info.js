@@ -2,7 +2,7 @@
 const InfoPage = {
   render() {
     return `
-      <div class="card">
+      <div class="card" style="width: 520px;">
         <h1 id="title"></h1>
         <div class="field">
           <label for="friendName">당신의 이름</label>
