@@ -7,7 +7,7 @@ const InfoPage = {
         <div class="field">
           <label for="friendName">당신의 이름</label>
           <div class="row">
-            <select id="friendIcon" title="아이콘 선택" style="height:40px; border:1px solid #d6d9df; border-radius:8px; padding:0 8px;">
+            <select id="friendIcon" title="아이콘 선택" style="height:40px; border:1px solid rgba(232, 74, 107, 0.3); border-radius:8px; padding:0 8px;">
               <option value="">pick</option>
               <option>🥰</option>
               <option>🫥</option>

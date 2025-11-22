@@ -6,9 +6,9 @@ const ProfilePage = {
         <div class="card" style="width: 540px;">
           <div class="titleRow">
             <h1 id="title"></h1>
-            <button id="share" type="button" class="btn btnShare">친구수집</button>
+            <button id="share" type="button" class="btn btnShare btnFriendCollection">친구수집</button>
           </div>
-          <hr style="margin-top:12px; border:none; border-top:1px solid #e5e7eb;">
+          <hr style="margin-top:12px; border:none; border-top:1px solid rgba(232, 74, 107, 0.3);">
           <div id="msg" class="msg"></div>
           <div id="opinions" class="list"></div>
         </div>
@@ -95,7 +95,7 @@ const ProfilePage = {
 
     async function renderOpinionButtons() {
       const container = document.getElementById('opinions');
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">로딩 중...</div>';
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#E84A6B;">로딩 중...</div>';
       
       try {
         const list = await loadOpinions();
@@ -104,8 +104,8 @@ const ProfilePage = {
         
         if (list.length === 0) {
           const emptyMsg = document.createElement('div');
-          emptyMsg.style.cssText = 'display: flex; justify-content: center; align-items: center; color: #6b7280; font-size: 14px; padding: 40px 20px; line-height: 1.6; text-align: center;';
-          emptyMsg.innerHTML = '<div><div style="font-size: 18px; margin-bottom: 8px;">↗</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
+          emptyMsg.style.cssText = 'grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: center; color: #E84A6B; font-size: 14px; padding: 40px 20px; line-height: 1.6; width: 100%;';
+          emptyMsg.innerHTML = '<div style="text-align: center;"><div style="font-size: 18px; margin-bottom: 8px;">↑</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
           container.appendChild(emptyMsg);
           return;
         }
@@ -134,7 +134,7 @@ const ProfilePage = {
         });
       } catch (err) {
         console.error('Error rendering opinions:', err);
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:#dc2626;">데이터를 불러오는 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</div>';
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:#F25675;">데이터를 불러오는 중 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</div>';
       }
     }
 
