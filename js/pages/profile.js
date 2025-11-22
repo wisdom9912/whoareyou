@@ -102,15 +102,18 @@ const ProfilePage = {
         
         container.innerHTML = '';
         
-        // qwe123 테스트용 예시 버튼 추가 (리스트가 비어있을 때만)
-        if (userId === 'qwe123' && list.length === 0) {
-          const testBtn = document.createElement('button');
-          testBtn.className = 'btnItem';
-          testBtn.textContent = '🥰 테스트';
-          testBtn.addEventListener('click', () => {
-            router.navigate('/mytomodacchi', { id: userId, idx: 0 });
-          });
-          container.appendChild(testBtn);
+        // qwe123 테스트용 예시 버튼 7개 추가
+        if (userId === 'qwe123') {
+          const testIcons = ['🥰', '🫥', '😎', '😝', '😵', '🤪', '😇'];
+          for (let i = 0; i < 7; i++) {
+            const testBtn = document.createElement('button');
+            testBtn.className = 'btnItem';
+            testBtn.textContent = testIcons[i] + ' 테스트' + (i + 1);
+            testBtn.addEventListener('click', () => {
+              router.navigate('/mytomodacchi', { id: userId, idx: i });
+            });
+            container.appendChild(testBtn);
+          }
           return;
         }
         
