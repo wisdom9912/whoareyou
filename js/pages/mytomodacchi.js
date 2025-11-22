@@ -4,6 +4,7 @@ const MyTomodacchiPage = {
     return `
       <div class="card" style="width: 640px;">
         <div class="header"><span id="left"></span><span id="right" class="right"></span></div>
+        <hr style="margin-top:4px; margin-bottom:24px; border:none; border-top:1px solid rgba(232, 74, 107, 0.3);">
         <div class="section">
           <h2>첫인상</h2>
           <div id="first" class="box"></div>
@@ -13,9 +14,9 @@ const MyTomodacchiPage = {
           <div id="current" class="box"></div>
         </div>
         <div class="section" id="guessSection">
-          <h2>나는 누구일까요?</h2>
+          <h2>친구의 이름은?</h2>
           <div class="row">
-            <input id="guessInput" type="text" placeholder="이 사람이 누구인지 입력하세요">
+            <input id="guessInput" type="text" placeholder="이 친구의 이름을 맞혀보세요!">
             <input id="passwordInput" type="password" class="password" placeholder="비밀번호" maxlength="4" pattern="[0-9]{4}">
             <button id="guessBtn" class="btnGuess">입력</button>
           </div>
@@ -30,7 +31,7 @@ const MyTomodacchiPage = {
           <h2>정답은?</h2>
           <div id="answer" class="box"></div>
         </div>
-        <div class="actions">
+        <div class="actions" style="margin-top: 24px;">
           <button id="back" class="btn">다른 친구 확인하기</button>
         </div>
       </div>
@@ -130,7 +131,7 @@ const MyTomodacchiPage = {
     function lockGuess(guess, friendName) {
       fixedGuessEl.textContent = guess;
       const accountJosa = Utils.getJosa(accountName);
-      fixedGuessTitleEl.textContent = accountJosa + ' 입력한 답';
+      fixedGuessTitleEl.textContent = accountJosa + ' 추정하기로....';
       guessSection.style.display = 'none';
       fixedSection.style.display = '';
       const ansSec = document.getElementById('answerSection');

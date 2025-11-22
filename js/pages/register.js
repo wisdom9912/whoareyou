@@ -14,7 +14,7 @@ const RegisterPage = {
         </div>
         <div class="field">
           <label for="password">비밀번호</label>
-          <div class="hint">친구 이름을 맞출 때 사용됩니다</div>
+          <div class="hint">친구 이름을 맞힐 때 사용됩니다</div>
           <input id="password" type="password" placeholder="4자리 숫자" maxlength="4" pattern="[0-9]{4}">
         </div>
         <div class="actions">

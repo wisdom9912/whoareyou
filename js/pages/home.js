@@ -3,10 +3,10 @@ const HomePage = {
   render() {
     return `
       <div class="wrap">
-        <div class="card">
+        <div class="card homeCard">
           <h1>누구의 프로필로 이동할까요?</h1>
+          <hr style="margin-top:4px; margin-bottom:24px; border:none; border-top:1px solid rgba(232, 74, 107, 0.3);">
           <div class="field">
-            <label for="userId">아이디</label>
             <div class="inputRow">
               <input id="userId" type="text" placeholder="아이디를 입력하세요" autocomplete="username">
               <button id="loginBtn" class="btn inline">go</button>

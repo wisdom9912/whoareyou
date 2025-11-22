@@ -13,7 +13,7 @@ const ProfilePage = {
           <div id="opinions" class="list"></div>
         </div>
         <div class="outerActions">
-          <button id="createMine" class="btn">내 정보 생성하기</button>
+          <button id="createMine" class="btn">내 프로필 생성하기</button>
         </div>
         <div class="outerActions">
           <button id="goBack" class="btn secondary">뒤로가기</button>
@@ -102,10 +102,22 @@ const ProfilePage = {
         
         container.innerHTML = '';
         
+        // qwe123 테스트용 예시 버튼 추가 (리스트가 비어있을 때만)
+        if (userId === 'qwe123' && list.length === 0) {
+          const testBtn = document.createElement('button');
+          testBtn.className = 'btnItem';
+          testBtn.textContent = '🥰 테스트';
+          testBtn.addEventListener('click', () => {
+            router.navigate('/mytomodacchi', { id: userId, idx: 0 });
+          });
+          container.appendChild(testBtn);
+          return;
+        }
+        
         if (list.length === 0) {
           const emptyMsg = document.createElement('div');
           emptyMsg.style.cssText = 'grid-column: 1 / -1; display: flex; justify-content: flex-end; align-items: center; color: #E84A6B; font-size: 14px; padding: 40px 20px; line-height: 1.6; width: 100%;';
-          emptyMsg.innerHTML = '<div style="text-align: center;"><div style="font-size: 18px; margin-bottom: 8px;">↑</div><div>친구수집 버튼을<br>클릭해 공유해 보세요!</div></div>';
+          emptyMsg.innerHTML = '<div style="text-align: center;"><div style="font-size: 18px; margin-bottom: 8px;">↑</div><div>친구수집을 클릭해<br>링크를 복사해 보세요!</div></div>';
           container.appendChild(emptyMsg);
           return;
         }
@@ -114,23 +126,31 @@ const ProfilePage = {
         const guessPromises = list.map((item, idx) => loadGuess(userId, idx));
         const guesses = await Promise.all(guessPromises);
         
-        // 중복 제거를 위한 Set (friendName + icon 조합)
-        const seen = new Set();
+        // 중복 제거: 각 항목의 전체 내용으로 고유성 확인
+        const seen = new Map();
         const uniqueItems = [];
         
         list.forEach((item, idx) => {
           const hasGuess = !!guesses[idx];
           const icon = item.icon || '';
           const nameLabel = hasGuess && item.friendName ? item.friendName : '';
-          const uniqueKey = (icon || '') + '|' + (nameLabel || '');
           
-          // 중복되지 않은 항목만 추가
+          // 고유 키 생성: icon + friendName + firstImpression + currentImpression 조합
+          const uniqueKey = [
+            icon || '',
+            nameLabel || '',
+            item.firstImpression || '',
+            item.currentImpression || ''
+          ].join('|');
+          
+          // 중복되지 않은 항목만 추가 (첫 번째로 나타난 항목의 인덱스 사용)
           if (!seen.has(uniqueKey)) {
-            seen.add(uniqueKey);
+            seen.set(uniqueKey, idx);
             uniqueItems.push({ item, idx, hasGuess, icon, nameLabel });
           }
         });
         
+        // 고유한 항목들만 버튼으로 표시
         uniqueItems.forEach(({ item, idx, hasGuess, icon, nameLabel }) => {
           let label = '';
           if (nameLabel) {

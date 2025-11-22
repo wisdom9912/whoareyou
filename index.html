@@ -13,7 +13,7 @@
    display: flex;
    justify-content: center;
    align-items: center;
-   background: linear-gradient(180deg, #FFE4F0 0%, #FFF8E1 100%);
+   background: linear-gradient(180deg, #FFE1EE 0%, #FFF4E4 100%);
    font-family: "Comic Sans MS", "맑은 고딕", "Malgun Gothic", sans-serif;
   }
   #app {
@@ -29,7 +29,7 @@
    -webkit-backdrop-filter: blur(10px);
    border-radius: 12px;
    border: 1px solid rgba(255, 255, 255, 0.6);
-   box-shadow: 0 8px 32px rgba(220, 100, 120, 0.2);
+   box-shadow: 0 8px 32px rgba(220, 100, 120, 0.35);
    padding: 28px;
    box-sizing: border-box;
    text-align: left;
@@ -39,6 +39,9 @@
    font-size: 22px;
    color: #E84A6B;
    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  }
+  .card.homeCard h1 {
+   margin: 0 0 32px 0;
   }
   h1 { margin: 0 0 12px 0; font-size: 22px; color: #E84A6B; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); }
   h2 { margin: 0 0 8px 0; font-size: 16px; color: #E84A6B; font-weight: bold; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); }
@@ -64,7 +67,7 @@
    backdrop-filter: blur(5px);
    -webkit-backdrop-filter: blur(5px);
    color: #333;
-   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.15);
+   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.25);
   }
   textarea {
    padding: 10px 12px;
@@ -76,7 +79,7 @@
    backdrop-filter: blur(5px);
    -webkit-backdrop-filter: blur(5px);
    color: #333;
-   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.15);
+   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.25);
    min-height: 96px;
    resize: vertical;
   }
@@ -87,7 +90,7 @@
    backdrop-filter: blur(5px);
    -webkit-backdrop-filter: blur(5px);
    color: #333;
-   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.15);
+   box-shadow: inset 0 1px 2px rgba(220, 100, 120, 0.25);
   }
   .actions { margin-top: 16px; display: flex; gap: 8px; }
   .btn {
@@ -102,7 +105,7 @@
    font-size: 15px;
    cursor: pointer;
    font-weight: bold;
-   box-shadow: 0 4px 8px rgba(220, 100, 120, 0.3);
+   box-shadow: 0 4px 8px rgba(220, 100, 120, 0.35);
    transition: all 0.3s;
    border: 1px solid rgba(255, 255, 255, 0.3);
   }
@@ -121,23 +124,24 @@
   .btnShare { flex: none; height: 32px; padding: 0 12px; font-size: 13px; background: #9BDEAC; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
   .btnShare:hover { background: #8CD59B; }
   /* 친구수집 버튼 전용 스타일 - 작게 만들기 */
-  .btnFriendCollection { flex: none; width: 80px; height: 24px; padding: 0 8px; font-size: 11px; background: #9BDEAC; border-radius: 8px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+  .btnFriendCollection { flex: none; width: 80px; height: 35px; padding: 0 8px; font-size: 11px; background: #9BDEAC; border-radius: 8px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
   .btnFriendCollection:hover { background: #8CD59B; }
   /* 입력 버튼 스타일 - 친구수집 버튼과 동일한 디자인, 높이 40px */
   .btnGuess { flex: none; width: auto; height: 40px; padding: 0 16px; font-size: 14px; background: #9BDEAC; border-radius: 8px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(155, 222, 172, 0.3); }
   .btnGuess:hover { background: #8CD59B; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(155, 222, 172, 0.4); }
   .btnGuess:active { transform: translateY(0); }
   .msg { margin-top: 10px; font-size: 13px; color: #9BDEAC; font-weight: bold; }
-  .list { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .list .btnItem { aspect-ratio: 1; border: 1px solid rgba(232, 74, 107, 0.3); background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: #355D4F; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 100, 120, 0.2); transition: all 0.3s; }
-  .list .btnItem:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%); transform: scale(1.02); box-shadow: 0 4px 8px rgba(232, 74, 107, 0.3); }
+  .list { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 250px; overflow-y: auto; padding-right: 4px; scrollbar-width: none; -ms-overflow-style: none; }
+  .list::-webkit-scrollbar { display: none; }
+  .list .btnItem { aspect-ratio: 1; border: 1px solid rgba(232, 74, 107, 0.3); background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: #355D4F; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 500; box-shadow: 0 2px 4px rgba(220, 100, 120, 0.35); transition: all 0.3s; }
+  .list .btnItem:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%); }
   .outerActions { margin-top: 12px; width: 540px; display: flex; gap: 8px; justify-content: center; }
   .outerActions.home { width: 360px; }
   hr { border: none; border-top: 1px solid rgba(232, 74, 107, 0.3); }
   .header { font-size: 18px; font-weight: bold; color: #E84A6B; }
   .header .right { color: #E84A6B; margin-left: 8px; font-weight: bold; }
   .section { margin-top: 16px; }
-  .box { border: 1px solid rgba(232, 74, 107, 0.3); border-radius: 8px; padding: 12px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); white-space: pre-wrap; line-height: 1.6; color: #333; box-shadow: 0 2px 4px rgba(220, 100, 120, 0.2); }
+  .box { border: 1px solid rgba(232, 74, 107, 0.3); border-radius: 8px; padding: 12px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); white-space: pre-wrap; line-height: 1.6; color: #333; box-shadow: 0 2px 4px rgba(220, 100, 120, 0.35); }
   .row input.password { flex: none; width: 80px; }
   .subtle { color: #E84A6B; font-size: 13px; margin-top: 6px; }
   .errorMsg { color: #F25675; font-size: 13px; margin-top: 6px; font-weight: bold; }
@@ -145,10 +149,44 @@
   .card[data-page="profile"] { width: 540px; }
   .card[data-page="info"] { width: 520px; }
   .card[data-page="mytomodacchi"] { width: 640px; }
+  /* 홈 페이지 카드 - 신용카드 비율 */
+  .card.homeCard { width: 360px; aspect-ratio: 1.925 / 1; }
+  /* 도움말 아이콘 및 카드 */
+  .help-icon { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+  .help-circle { width: 32px; height: 32px; border-radius: 50%; background: rgba(232, 74, 107, 0.9); color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 8px rgba(220, 100, 120, 0.4); transition: all 0.3s; position: relative; }
+  .help-circle:hover { background: rgba(232, 74, 107, 1); transform: scale(1.1); box-shadow: 0 6px 12px rgba(220, 100, 120, 0.5); }
+  .help-heart, .help-heart-arrow { width: 18px; height: 18px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); transition: opacity 0.3s; filter: brightness(0) invert(1); }
+  .help-heart-arrow { opacity: 0; }
+  .help-icon:hover .help-heart { opacity: 0; }
+  .help-icon:hover .help-heart-arrow { opacity: 1; animation: shake 0.3s ease-in-out; }
+  @keyframes shake {
+   0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+   25% { transform: translate(-50%, -50%) translateX(-2px); }
+   75% { transform: translate(-50%, -50%) translateX(2px); }
+  }
+  .help-card { position: absolute; bottom: 50px; right: 0; width: 280px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.75) 100%); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 12px; border: 1px solid rgba(232, 74, 107, 0.3); box-shadow: 0 8px 32px rgba(220, 100, 120, 0.4); padding: 16px; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+  .help-icon:hover .help-card { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+  .help-content { color: #E84A6B; font-size: 13px; line-height: 1.8; }
+  .help-title { text-align: center; font-weight: bold; margin-bottom: 8px; }
  </style>
 </head>
-<body>
- <div id="app"></div>
+ <body>
+  <div id="app"></div>
+  <div class="help-icon">
+   <div class="help-circle">
+    <img src="img/heart.svg" alt="도움말" class="help-heart">
+    <img src="img/heart-arrow.svg" alt="도움말" class="help-heart-arrow">
+   </div>
+   <div class="help-card">
+    <div class="help-content">
+     <div class="help-title">사용 설명서</div>
+     1. 내 프로필을 만든다.<br>
+     2. [친구수집] 버튼을 눌러 링크를 복사한다.<br>
+     3. 복사한 링크를 친구들에게 공유한다.<br>
+     4. 친구가 써준 내용을 보고 친구 이름을 맞힌다.
+    </div>
+   </div>
+  </div>
  
  <script src="js/config.js"></script>
  <script src="js/utils.js"></script>
