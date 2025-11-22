@@ -114,10 +114,24 @@ const ProfilePage = {
         const guessPromises = list.map((item, idx) => loadGuess(userId, idx));
         const guesses = await Promise.all(guessPromises);
         
+        // 중복 제거를 위한 Set (friendName + icon 조합)
+        const seen = new Set();
+        const uniqueItems = [];
+        
         list.forEach((item, idx) => {
           const hasGuess = !!guesses[idx];
           const icon = item.icon || '';
           const nameLabel = hasGuess && item.friendName ? item.friendName : '';
+          const uniqueKey = (icon || '') + '|' + (nameLabel || '');
+          
+          // 중복되지 않은 항목만 추가
+          if (!seen.has(uniqueKey)) {
+            seen.add(uniqueKey);
+            uniqueItems.push({ item, idx, hasGuess, icon, nameLabel });
+          }
+        });
+        
+        uniqueItems.forEach(({ item, idx, hasGuess, icon, nameLabel }) => {
           let label = '';
           if (nameLabel) {
             label = icon ? (icon + ' ' + nameLabel) : nameLabel;

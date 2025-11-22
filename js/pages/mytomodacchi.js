@@ -17,7 +17,7 @@ const MyTomodacchiPage = {
           <div class="row">
             <input id="guessInput" type="text" placeholder="이 사람이 누구인지 입력하세요">
             <input id="passwordInput" type="password" class="password" placeholder="비밀번호" maxlength="4" pattern="[0-9]{4}">
-            <button id="guessBtn" class="btn">입력</button>
+            <button id="guessBtn" class="btnGuess">입력</button>
           </div>
           <div id="guessInfo" class="subtle"></div>
           <div id="passwordError" class="errorMsg"></div>

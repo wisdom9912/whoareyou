@@ -55,7 +55,7 @@ const InfoPage = {
 
     // Load user name
     const name = await Utils.getUserName(userId);
-    document.getElementById('title').textContent = name + '님에 대한 의견 남기기';
+    document.getElementById('title').innerHTML = '<i class="fi fi-rr-stars"></i> ' + name + '님에 대한 의견 남기기';
     document.getElementById('firstImpression').placeholder = name + '님을 처음 봤을 때의 인상을 적어주세요';
     document.getElementById('currentImpression').placeholder = '현재 느끼는 ' + name + '님의 인상을 적어주세요';
 
